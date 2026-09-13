@@ -1,0 +1,37 @@
+[
+  {
+    "id": "TC01",
+    "type": "CHITCHAT",
+    "complexity": "EASY",
+    "expected_behavior": "LLM trò chuyện bình thường, không gọi Tool.",
+    "question": "Chào bạn, bạn có thể giúp tôi đặt lịch tập gym được không?"
+  },
+  {
+    "id": "TC02",
+    "type": "QUERY",
+    "complexity": "MEDIUM",
+    "expected_behavior": "LLM trích xuất intent và gọi Tool check_gym_schedule",
+    "question": "Tôi muốn kiểm tra xem ở phòng Gym Trâu Quỳ, Gia Lâm vào lúc 18:00 ngày 15/09/2026 có còn chỗ trống không?"
+  },
+  {
+    "id": "TC03",
+    "type": "TRANSACTION",
+    "complexity": "HARD",
+    "expected_behavior": "LLM gọi trực tiếp Tool book_gym_slot",
+    "question": "Tôi là Đào Đức Hải, đặt luôn giúp tôi ca tập ở Trâu Quỳ, Gia Lâm lúc 18:00 ngày 15/09/2026 nhé!"
+  },
+  {
+    "id": "TC04",
+    "type": "UNKNOWN_LOCATION",
+    "complexity": "MEDIUM",
+    "expected_behavior": "LLM gọi check_gym_schedule, trả về không tìm thấy phòng tập",
+    "question": "Tôi muốn tập ở phòng Gym Hồ Gươm lúc 19:00 ngày 16/09/2026, kiểm tra giúp tôi."
+  },
+  {
+    "id": "TC05",
+    "type": "MULTI_INTENT",
+    "complexity": "EXPERT",
+    "expected_behavior": "LLM phân tích thông tin và gọi Tool phù hợp",
+    "question": "Hải đây, tôi muốn rèn luyện thể lực. Tìm cho tôi chỗ tập lúc 17:00 chiều mai ngày 16/09/2026 tại Trâu Quỳ Gia Lâm và đặt luôn nhé."
+  }
+]

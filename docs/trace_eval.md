@@ -1,8 +1,8 @@
 # 📊 BÁO CÁO THU HOẠCH NGHIỆM THU BÀI LAB 3 (BƯỚC 3 — SUBMISSION ARTIFACT)
 
-> **Họ và Tên Học viên:** [Điền Họ và Tên]  
-> **Mã Sinh Viên / Mã Học viên:** [Điền MSSV]  
-> **Chủ đề Lựa chọn:** [Điền tên chủ đề đã chọn từ docs/DANH_SACH_DE_TAI.md hoặc Đề tài Mở]  
+> **Họ và Tên Học viên:** Đào Đức Hải 
+> **Mã Sinh Viên / Mã Học viên:** 2A202602752 
+> **Chủ đề Lựa chọn:** Trợ lý đặt lịch tập Gym
 
 ---
 
@@ -10,11 +10,11 @@
 
 | Tiêu chí Đánh giá | Mức độ (1 - 5) | Giải trình chi tiết lý do chọn điểm |
 | :--- | :---: | :--- |
-| **1. Multi-step Reasoning** | / 5 | Bài toán có yêu cầu chia nhỏ nhiều bước suy luận nối tiếp nhau không? |
-| **2. Tool Interaction** | / 5 | Hệ thống có cần kết nối với MCP Server / Cơ sở dữ liệu bên ngoài không? |
-| **3. Dynamic Decision** | / 5 | Bước tiếp theo có phụ thuộc vào kết quả quan sát bước trước không? |
-| **4. Long Horizon Goal** | / 5 | Hệ thống có phải giữ mục tiêu xuyên suốt qua nhiều lượt xử lý không? |
-| **TỔNG ĐIỂM AGENTIC FIT** | **/ 20** | *Nếu tổng điểm > 12/20: Bài toán rất phù hợp triển khai Agentic System.* |
+| **1. Multi-step Reasoning** | 5 / 5 | Bài toán yêu cầu bóc tách intent rõ ràng: Đầu tiên phân tích thời gian/địa điểm, sau đó kiểm tra lịch trống, và cuối cùng tiến hành đặt lịch nếu thỏa mãn điều kiện |
+| **2. Tool Interaction** | 5 / 5 | Bắt buộc kết nối với MCP Server để giao tiếp với các tool `check_gym_schedule` (tra cứu database phòng tập) và `book_gym_slot` (ghi nhận đặt chỗ) |
+| **3. Dynamic Decision** | 5 / 5 | Hành động tiếp theo phụ thuộc hoàn toàn vào kết quả quan sát (Observation). Ví dụ: Nếu ca tập hết chỗ, Agent phải linh hoạt thông báo thay vì gọi tool đặt lịch |
+| **4. Long Horizon Goal** | 4 / 5 | Agent phải duy trì mục tiêu hỗ trợ khách hàng xuyên suốt hội thoại, ghi nhớ các ràng buộc (khu vực, khung giờ) cho đến khi chốt giao dịch |
+| **TỔNG ĐIỂM AGENTIC FIT** | **19 / 20** | *Đề tài hoàn toàn phù hợp để triển khai kiến trúc ReAct Agent (Agentic System)* |
 
 ---
 
@@ -28,20 +28,23 @@ Dán 1 đoạn trích xuất log tiêu biểu từ file `docs/trace_waterfall.js
 [
   {
     "step": 1,
+    "query": "Tôi muốn kiểm tra xem ở phòng Gym Trâu Quỳ, Gia Lâm vào lúc 18:00 ngày 15/09/2026 có còn chỗ trống không?",
     "action_type": "TOOL_EXECUTION",
-    "tool_name": "academic_query",
+    "tool_name": "check_gym_schedule",
     "arguments": {
-      "student_id": "SV2026001"
+      "location": "Trâu Quỳ, Gia Lâm",
+      "preferred_time": "18:00",
+      "date": "15/09/2026"
     },
     "observation": {
       "status": "SUCCESS",
-      "student_id": "SV2026001",
-      "data": {
-        "full_name": "Nguyễn Văn An",
-        "gpa": 3.85
-      }
+      "is_available": true,
+      "available_slots": 3,
+      "trainer_on_duty": "Trần Văn B",
+      "facility": "Trâu Quỳ, Gia Lâm",
+      "message": "Phòng tập tại Trâu Quỳ, Gia Lâm còn 3 chỗ trống vào lúc 18:00 ngày 15/09/2026."
     },
-    "latency_ms": 120.5
+    "latency_ms": 2301.38
   }
 ]
 ```
@@ -50,10 +53,10 @@ Dán 1 đoạn trích xuất log tiêu biểu từ file `docs/trace_waterfall.js
 
 ## 3. TỔNG KẾT KẾT QUẢ NGHIỆM THU & NỘP BÀI
 
-- [ ] Đã điền API Key thật trong `.env` và xác nhận Agent chạy mượt mà trên LLM API thật (Gemini/OpenAI).
-- **Tổng số Test Cases đã chạy thành công:** ___ / 5 test cases.
-- **Số lượt gọi Tool qua MCP Server chính xác:** ___ lượt.
-- **Kết quả đẩy Repo nộp bài:** [ ] Đã Commit và Push mã nguồn thành công lên GitHub cá nhân.
+- [x] Đã điền API Key thật trong `.env` và xác nhận Agent chạy mượt mà trên LLM API thật (Gemini/OpenAI).
+- **Tổng số Test Cases đã chạy thành công:** 5 / 5 test cases.
+- **Số lượt gọi Tool qua MCP Server chính xác:** 4 lượt.
+- **Kết quả đẩy Repo nộp bài:** [x] Đã Commit và Push mã nguồn thành công lên GitHub cá nhân.
 
 ---
 

@@ -1,6 +1,7 @@
 """
-🛠️ TOOL DEFINITIONS & EXECUTION BACKEND
+TOOL DEFINITIONS & EXECUTION BACKEND
 Mã nguồn chứa danh sách Tool Schemas (JSON Schema) và Execution Layer phục vụ cho MCP Server.
+(Đã tùy biến cho Đề tài: Trợ lý đặt lịch tập Gym)
 """
 
 import json
@@ -11,41 +12,55 @@ from typing import Dict, Any
 # ==============================================================================
 
 TOOLS_SCHEMA = [
-    # Tool 1: Đã được định nghĩa mẫu sẵn cho Học viên tham khảo
+    # Tool 1: Kiểm tra lịch trống của phòng Gym
     {
-        "name": "academic_query",
-        "description": "Tra cứu hồ sơ và thông tin học vụ của sinh viên VinUni bằng mã sinh viên.",
+        "name": "check_gym_schedule",
+        "description": "Kiểm tra xem phòng gym có còn chỗ trống trong khung giờ cụ thể không.",
         "parameters": {
             "type": "object",
             "properties": {
-                "student_id": {
+                "location": {
                     "type": "string",
-                    "description": "Mã sinh viên cần tra cứu (ví dụ: 'SV2026001')"
+                    "description": "Khu vực phòng tập, ví dụ: 'Trâu Quỳ, Gia Lâm'"
+                },
+                "date": {
+                    "type": "string",
+                    "description": "Ngày tập, ví dụ: '15/09/2026'"
+                },
+                "preferred_time": {
+                    "type": "string",
+                    "description": "Giờ muốn tập, ví dụ: '18:00'"
                 }
             },
-            "required": ["student_id"]
+            "required": ["location", "date", "preferred_time"]
         }
     },
     
-    # --------------------------------------------------------------------------
-    # TODO 1.2: HỌC VIÊN HOÀN THIỆN TOOL SCHEMA CHO 'schedule_appointment'
-    # 🎯 YÊU CẦU THIẾT KẾ SCHEMA (JSON SCHEMA STANDARD):
-    # 1. Tool dùng để đặt lịch hẹn tư vấn học vụ với Cố vấn học tập VinUni.
-    # 2. Thiết kế các tham số (properties) để LLM trích xuất:
-    #    - student_id (string): Mã sinh viên cần đặt lịch (ví dụ: 'SV2026001')
-    #    - datetime_str (string): Thời gian hẹn (ví dụ: '14:00 15/09/2026')
-    #    - advisor_name (string): Tên cố vấn học tập
-    # 3. Khai báo danh sách các trường bắt buộc (required).
-    # --------------------------------------------------------------------------
+    # Tool 2: Đặt lịch tập
     {
-        "name": "schedule_appointment",
-        "description": "Đặt lịch hẹn tư vấn học vụ với Cố vấn học tập VinUni.",
+        "name": "book_gym_slot",
+        "description": "Thực hiện đặt chỗ phòng gym sau khi đã kiểm tra lịch trống thành công.",
         "parameters": {
             "type": "object",
             "properties": {
-                # TODO 1.2: Khai báo các thuộc tính tham số cho Tool tại đây...
+                "user_name": {
+                    "type": "string",
+                    "description": "Tên người đặt lịch"
+                },
+                "location": {
+                    "type": "string",
+                    "description": "Khu vực phòng tập"
+                },
+                "date": {
+                    "type": "string",
+                    "description": "Ngày tập"
+                },
+                "time": {
+                    "type": "string",
+                    "description": "Giờ tập"
+                }
             },
-            "required": [] # TODO 1.2: Khai báo danh sách các trường bắt buộc tại đây...
+            "required": ["user_name", "location", "date", "time"]
         }
     }
 ]
@@ -54,58 +69,49 @@ TOOLS_SCHEMA = [
 # 2. MÔ PHỎNG DỮ LIỆU & HÀM THỰC THI TOOL (EXECUTION LAYER)
 # ==============================================================================
 
-MOCK_DATABASE = {
-    "SV2026001": {
-        "full_name": "Nguyễn Văn An",
-        "class": "AI-K4",
-        "gpa": 3.85,
-        "email": "an.nv@vinuni.edu.vn",
-        "status": "Đang học",
-        "advisor": "PGS.TS Nguyễn Văn A"
-    },
-    "SV2026002": {
-        "full_name": "Trần Thị Bình",
-        "class": "AI-K4",
-        "gpa": 3.60,
-        "email": "binh.tt@vinuni.edu.vn",
-        "status": "Đang học",
-        "advisor": "TS. Lê Thị B"
+MOCK_GYM_DATABASE = {
+    "Trâu Quỳ, Gia Lâm": {
+        "is_open": True,
+        "trainer": "HLV Trần Văn B",
+        "capacity_left": 3
     }
 }
 
-
-def execute_academic_query(student_id: str) -> str:
-    """Thực thi tra cứu học vụ theo mã sinh viên"""
-    student = MOCK_DATABASE.get(student_id.strip().upper())
-    if student:
+def execute_check_gym_schedule(location: str, date: str, preferred_time: str) -> str:
+    """Thực thi kiểm tra lịch trống phòng gym"""
+    # Dùng logic if-in để nhận diện linh hoạt "Trâu Quỳ"
+    if "Trâu Quỳ" in location or "Gia Lâm" in location:
         return json.dumps({
             "status": "SUCCESS",
-            "student_id": student_id,
-            "data": student
+            "is_available": True,
+            "available_slots": 3,
+            "trainer_on_duty": "Trần Văn B",
+            "facility": location,
+            "message": f"Phòng tập tại {location} còn 3 chỗ trống vào lúc {preferred_time} ngày {date}."
         }, ensure_ascii=False)
     else:
         return json.dumps({
             "status": "NOT_FOUND",
-            "message": f"Không tìm thấy dữ liệu sinh viên có mã '{student_id}'"
+            "is_available": False,
+            "message": f"Xin lỗi, hiện tại không tìm thấy phòng tập hoặc đã hết chỗ ở khu vực '{location}'."
         }, ensure_ascii=False)
 
-
-def execute_schedule_appointment(student_id: str, datetime_str: str, advisor_name: str = "PGS.TS Nguyễn Văn A") -> str:
-    """Thực thi đặt lịch hẹn tư vấn học vụ"""
+def execute_book_gym_slot(user_name: str, location: str, date: str, time: str) -> str:
+    """Thực thi đặt lịch tập"""
+    booking_id = f"GYM-{date.replace('/','')}-8821"
     return json.dumps({
         "status": "SUCCESS",
-        "booking_id": f"BK-{student_id}-99",
-        "student_id": student_id,
-        "datetime": datetime_str,
-        "advisor": advisor_name,
-        "message": f"Đặt lịch thành công cho sinh viên {student_id} với {advisor_name} vào lúc {datetime_str}."
+        "booking_id": booking_id,
+        "user_name": user_name,
+        "datetime": f"{time} {date}",
+        "location": location,
+        "message": f"Tuyệt vời! Đã đặt lịch thành công cho {user_name} tại {location} lúc {time} ngày {date}. Mã đặt chỗ của bạn là {booking_id}."
     }, ensure_ascii=False)
-
 
 # Router gọi tool thực tế
 TOOL_ROUTER = {
-    "academic_query": execute_academic_query,
-    "schedule_appointment": execute_schedule_appointment
+    "check_gym_schedule": execute_check_gym_schedule,
+    "book_gym_slot": execute_book_gym_slot
 }
 
 def dispatch_tool_call(tool_name: str, arguments: Dict[str, Any]) -> str:
